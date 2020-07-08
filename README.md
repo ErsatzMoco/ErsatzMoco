@@ -1,8 +1,8 @@
-#ErsatzMoco
+# ErsatzMoco
 
 An open source framework/toolkit for microcontrollers. Currently ErsatzMoco only supports Arduino from scratch, but the structure should allow for easy ports to other ecosystems. It is released under GPL v3 license.
 
-##Features
+## Features
 
 * Unified wrappers for a number of commonly available displays
 * Simple but nice and effective GUI toolkit that can integrate icons loaded from SD card
@@ -11,7 +11,7 @@ An open source framework/toolkit for microcontrollers. Currently ErsatzMoco only
 * Stable, simple and human-readable (simplifies debugging) messaging protocol that works with all communication modules integrated in ErsatzMoco (currently Serial and RFM69). The protocol offers the configurable modes „send without acknowledge“ and „send with acknowledge“, but not „send exactly once“. This is intentionally because the latter mode is very hard to implement in a way that prevents system lock-ups reliably. Please see „ErsatzMoco communication protocol“ for further information.
 * Framework design that is intended to constantly keep track of the status of each component integrated in your setup. Currently, this is not fully implemented yet. The goal is to offer status updates from every component at any time on request. That way it should be possible to create a full virtual representation of a project, for example as a reliable control surface.
 
-##Introduction
+## Introduction
 
 ErsatzMoco provides software modules for easy integration of common actuators and sensors. The objective is to get projects up and running much more quickly by eliminating the need to reinvent the wheel again and again - without being forced to use a special commercial hardware ecosystem.
 
@@ -19,7 +19,7 @@ I wrote this toolkit for myself so I could just hook up some common components, 
 
 This project definitely is constant work in progress. During development it became obvious that running a project with just one or two components hooked to the microcontroller is quite simple using low-level libraries provided with these components - but it can be a daunting task to control a greater number of actuators/sensors simultaneously since some libraries sometimes interfere with others. ErsatzMoco helps a little by providing higher-level classes that may persist even when you exchange one component for another. Still it’s both vital and cumbersome to keep an eye on the low-level libraries used in your project. This is the reason ErsatzMoco does not control stepper motors using hardware interrupts but instead via software clocks. This is less exact for sure, but it helps to maintain setups more easily that do not require timing close to the processor’s clock frequency. That said it should always be possible to combine your custom code with some helpful components of ErsatzMoco if necessary.
 
-##Requirements
+## Requirements
 
 Currently, ErsatzMoco is written in C++ and relies on the standard Arduino environment plus an STL port like [ArduinoSTL by Mike Matera] (https://github.com/mike-matera/ArduinoSTL). I prefer C++ to plain C because I like to code object oriented. My intention is to port ErsatzMoco to MicroPython/CircuitPython as well.
 The code uses some C++ features that are potentially dangerous in a microcontroller environment: Some objects are deliberately created on the heap instead of the stack. This could open memory leaks if it’s not properly taken care of, but I had reasons for this setup - please see the remarks in the source code. 
@@ -29,18 +29,18 @@ Currently, the code is tested on the Adafruit Feather M0 only, but it should als
 To make ErsatzMoco work, you need to include several libraries. Some of them like the nice and indispensable [RFM69 library by lowpowerlab] (https://github.com/LowPowerLab/RFM69) may show some compilation quirks in the Arduino environment for arbitrary reasons. This may occur anytime with any library and is not related to ErsatzMoco - please consult the web on how to deal with problems like that. Sometimes there are also pitfalls really hard to find: The RFM69 library for example showed some complex interrupt issues on SAMD processors that crashed the program (when using the SPI bus for other purposes simultaneously, like with a display). I cannot deal with quirks like that myself, but please report them anyway - after some time someone may be able to track down the culprits and solve the problem.
 Note: The RFM69 module (class RFM69_Module.cpp) switches the radio module to the European frequency of 868 MHz. Please adjust the settings in the header file (RFM69_Module.hpp) according to your board, your country and your needs.
 
-##Installation/Quick Start
+## Installation/Quick Start
 
 The main „control center“ classes of ErsatzMoco are specialized subclasses of MocoUnit. A MocoUnit subclass basically represents the box/thing/contraption you are working with. It keeps track of all subsystems and actuators and controls the clock. So you always need one subclass of MocoUnit like „Remote“ or „Locomotive“. The MocoUnit subclasses provided with ErsatzMoco give you an idea of how the toolkit works. Please study them carefully - they show which object instances need to be stored in global variables, how callbacks are used and so on. You may want to create your own subclass of MocoUnit according to your project.
 To integrate this main class with the standard Arduino environment you need to create the object in an (apart from that almost empty) “.ino“ file that forwards the standard Arduino polling cycle to your MocoUnit. Please see the example classes in the main directory ending with an underscore like „ErsatzMoco_Remote.cp_“. If you want to use one of them directly, simply create a copy and rename its suffix to “.ino“. This will be the file you open in the Arduino IDE for compilation. Place the „src“ and the „include“ directories of ErsatzMoco into the same directory your “.ino“ file resides in.
 If your project integrates elements for user interaction, e.g. push buttons, you should add an instance of UserInterface as well. The UserInterface class keeps track of any physical input devices. Again, please inspect MocoUnit subclasses for more information and have a look at the class diagrams that show the classes available and their relations.
 Anything else is pretty much optional and depends on your project. If your device uses a display, you probably want to add a suitable subclass of Display. A communication module - subclass of ComModule - is most useful as well because it integrates the ErsatzMoco communication protocol with your project.
 
-##Code base and contributing
+## Code base and contributing
 
 This is an open source project, so contributions and bug reports are welcome and will be taken care of within the bounds of possibility. Nonetheless I currently want to keep track of the project personally. The reason is this: I use ErsatzMoco for my own purposes and intend to keep ErsatzMoco suitable for my needs. This does not mean I won’t add useful modules suggested - I just want to be able to fully understand the code in the future as well. In general I strongly prefer stability, readability and ease of use to speed optimization and ideology, if I may say so. For this very reason (and probably a bit of laziness too) I currently do *not* apply the full C++ code style with „auto“, smart pointers and so on but rather use some of the C++ advantages only. I understand if you dislike this mixed/dirty approach, there may be better solutions and I’m open for friendly suggestions of course, but please respect my choice of trying to keep things simple, even if you personally consider them out of style. I believe this makes the code more readable for people who have just started to tinker with the world of microcontrollers and Arduino. I do know this approach is potentially dangerous if not each and every pointer and variable is thoroughly taken care of, but in fact that kind of transparency is what I try to achieve in a C/C++ environment anyway. Please don’t expect perfection in any way - there may be shocking flaws I just overlooked, there may be weaknesses in design. There are even deliberate non-C++ pointer casts (OMG). The code released here works nicely so far but does not come with any warranty whatsoever.
 
-##ErsatzMoco communication protocol
+## ErsatzMoco communication protocol
 
 The protocol provides a unified way of communication between devices using ErsatzMoco. That way your devices may easily be remote controlled. The protocol also works independent of the communication channel, so your devices may talk via RFM69 modules or serial connections (including ZigBee in transparent mode) or both. Other channels may be added in the future. Since the protocol is human readable and ASCII coded you may type commands into a serial terminal for debugging purposes.
 
